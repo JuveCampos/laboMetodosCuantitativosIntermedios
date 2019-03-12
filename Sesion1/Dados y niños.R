@@ -35,8 +35,45 @@ mean(exitos2)
 
 ### LOS RESULTADOS SON INDEPENDIENTES?? ##
 
+#################################
+# 2. C A S O    D E L   D A D O #  
+################################
+
+# Programamos un dado!
+dado <- 1:6
+
+#lanzar la moenda
+sample(dado, 1)
+
+# vector de exitos
+exitos <- c()
+
+# Hacemos 100 lanzamientos
+for(i in 1:1000){
+  exitos[i] <- sample(dado, 1)
+}
+exitos
+
+table(exitos)
+
+# Probabilidades
+table(exitos)[1]/1000
+table(exitos)[2]/1000
+table(exitos)[3]/1000
+table(exitos)[4]/1000
+table(exitos)[5]/1000
+table(exitos)[6]/1000
+
+# Exitos 
+exitos2 <- ifelse(exitos =="aguila", 1, 0)
+exitos2
+
+# Media de exitos == Valor Esperado
+mean(exitos2)
+
+
 #######################
-# 2. FUNCION BINOMIAL #
+# 3. FUNCION BINOMIAL #
 ######################
 
 # Sea nuestra variable aleatoria X el numero de hijos de cierto sexo 
