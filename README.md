@@ -2,7 +2,7 @@
 
 En este repositorio se almacenan documentos de soporte para el laboratorio de **Métodos Cuantitativos Intermedios** para la MPPP del CIDE. 
 
-**Contenido: **
+**Contenido:**
 
 * **Sesión 1.** Simulación de población y manejo de bases de datos. 
 
