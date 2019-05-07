@@ -4,14 +4,19 @@ output: html_document
 ---
 
 ## Tercera sesión
-Recapitulación de la regresión lineal.
 
-```{r}
+Recapitulación de la regresión lineal. Para esta sesión vamos a repasar la significancia de los coeficientes de regresión, $\beta$, que nos marcan el efecto de una de las variables independientes sobre la variable dependiente.
+
+Para este primer ejemplo analizaremos variables asociadas con el precio de viviendas seleccionadas para poblaciones de Los Ángeles, California.
+
+```{r,message=FALSE, warning=FALSE}
 # Librerias
-library(dplyr)
-library(ggplot2)
+library(dplyr)   # Manipulación de datos y uso de %>%
+library(ggplot2) # Hacer graficas
+options(scipen=999)
 
-# 1. Abrimos las bases
+# 1. Abrimos las bases 
+# Base de precios de casas en comunidades de Los Angeles
 LAhomes <- read.csv("BDs/LAhomes.csv")
 
 # Exploramos contenido
@@ -19,7 +24,29 @@ head(LAhomes)
 
 ```
 
+_Recordemos la_ 
 
+## Receta para hacer regresiones: 
+
+Para hacer regresiones hay que seguir los siguientes pasos: 
+
+* 1. Escribir la fórmula de la regresión. 
+
+**Formato:** Escribimos primero la variable dependiente, después una tilde (~) y luego las variables independientes, sumandolas con el signo `+`.
+
+Ejemplo:
+
+`formula <- var_dependiente ~ var_indep_1 + var_indep_2 `
+
+* 2. Utilizamos la función `lm(formula, data)` donde `formula` es la fórmula que escribimos en el paso 1, y `data` es la base de datos de donde se van a obtener los datos.
+
+* 3. Le damos enter, y listo! Fácil 😉.
+
+Y la utilizaremos para calcular regresiones... ���
+
+Para nuestra primer regresión, calcularemos el efecto de la superficie de la vivienda `sqft` medido en pies cuadrados, sobre el precio final, `price`, medido en USD.
+
+Posteriormente, graficaremos los datos observados para ver esta relación. 
 
 ```{r}
 #################################
@@ -31,7 +58,6 @@ lapply(LAhomes, class)
 
 # 1. Determinamos la formula
 fmla <- price ~ sqft
-#fmla <- price ~ aleat
 
 # 2. Aplicamos el modelo
 model <- lm(fmla, LAhomes)
@@ -44,14 +70,27 @@ summary(model)
 LAhomes$pred1 <- predict(model)
 
 # 5. Graficamos
-ggplot(LAhomes, 
+(plot <- ggplot(LAhomes, 
        aes(x = sqft, y = price)) + 
   geom_point() + 
   geom_line(aes(x = sqft, y = pred1), colour = "blue") + 
   theme_bw()   # Fondo blanco con rayas grises
+)
+
+plotly::ggplotly(plot)
 
 # Preguntas... que tan buena es esta regresipn para explicar el precio de la vivienda?
 ```
+
+Ahora, para nuestra segunda regresión, utilizaremos una base de datos de salud para estimar la mortalidad por 100,000 habitantes `deathrate` en base a diversas variables como: 
+
+* Disponibilidad de doctores por cada 100,000 habs.
+
+* Disponibilidad de hospitales.
+
+* Ingreso Anual Per Cápita.
+
+* Densidad de Población.
 
 ```{r}
 ##########################
@@ -67,20 +106,45 @@ head(health)
 
 
 ```{r}
+# Exploración de datos. Checar las clases de las variables de salud.
 lapply(health, class)
 
-# 3. Creamos el modelo
+# 3. Creamos el modelo (los modelos) declarando primero las fórmulas.
 fmla1 <- deathRate ~ doctorAvailability
 fmla2 <- deathRate ~ hospitalAvailability
 fmla3 <- deathRate ~ annualPerCapitaIncome
 fmla4 <- deathRate ~ populationDensity
 fmla5 <- deathRate ~ populationDensity + annualPerCapitaIncome + hospitalAvailability + doctorAvailability
+
 ```
+
+Una vez declaradas las fórmulas, pasamos a declarar los modelos. Recordemos que para la regresión lineal, utilizamos la función `lm`.
+
+La función `predict` sirve para, una vez declarado el modelo, podamos obtener los valores que la variable independiente debería tener si se comportara exactamente como se comporta el modelo.
+
+Recordemos, de la sesión anterior: 
+
+**¿Cómo interpreto los P-valores en el análisis de regresión lineal?**
+
+El p-valor para cada término comprueba la hipótesis nula de que el coeficiente es igual a cero (no tiene efecto). Un p-valor bajo (< 0.05) indica que puedes rechazar la hipótesis nula. En otras palabras, _un predictor que tenga un p-valor bajo es probable que tenga una adición significativa a su modelo porque los cambios en el valor del predictor están relacionados con cambios en la variable de respuesta_.
+
+Recíprocamente, un p-valor grande (insignificante) sugiere que los cambios en el predictor no están asociados con cambios en la respuesta. Mas info en este [enlace](https://www.addlink.es/noticias/minitab/2540-como-interpretar-los-resultados-del-analisis-de-regresion-p-valores-y-coeficientes).
+
+Entonces, el valor nos sirve para probar la siguiente hipótesis: 
+
+$$H_0: \beta = 0 $$ vs. 
+
+$$H_a: \beta \neq 0$$
+
+**¿Cómo interpretamos la R²?**
+
+$R^2$ nos  dice  qué  porcentaje  de  la  variabilidad  total en la variable Y puede  ser explicada  por  la  variable  regresora,  en  consecuencia  es  **una  medida  de  la  capacidad de PREDICCIÓN del modelo.** 
+
+$R^2$ también puede verse como es una medida de la fuerza de la ASOCIACIÓN LINEAL  entre  X  e  Y.  (Hacemos  énfasis  en  la  palabra  lineal  porque  fue  obtenido bajo un modelo lineal) 
 
 
 ```{r}
-# 4. Hacemos las regresiones
-
+# 4. Hacemos las regresiones (modelo lineal).
 model1 <- lm(fmla1, health) 
 summary(model1)
 
@@ -102,8 +166,13 @@ health$pred2 <- predict(model2)
 health$pred3 <- predict(model3)
 health$pred4 <- predict(model4)
 health$pred5 <- predict(model5)
+
+# 6. BONUS. Cálculo del error!
+health$error1 <- health$deathRate - health$pred1
+
 ```
 
+Ahora, pasamos a dibujar las gráficas de puntos y líneas que describen el fenómeno y el modelo predictivo.
 
 ```{r}
 # 6. Grafica
@@ -122,10 +191,7 @@ ggplot(health,
   geom_line(aes(x = doctorAvailability, y = pred1), colour = "blue") + 
   theme_bw()   # Fondo blanco con rayas grises
 
-# COmo podemos ver, en este caso el modelo casi no predice nada. 
+# Como podemos ver, en este caso el modelo casi no predice nada. 
+
 # Y es por esto que esta variable no es significante.
 ```
-
-
-
-
