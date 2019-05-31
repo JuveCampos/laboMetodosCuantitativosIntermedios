@@ -36,6 +36,13 @@ modelo <- lm(fmla, Ing)
 
 summary(modelo)
 
+# Graficamos la informacion y los puntos
+ing$predict <- predict(modelo)
+# Codigo de la grafica
+ggplot(ing, aes(x = ingreso, y = Gasto)) + 
+  geom_point() + 
+  geom_line(aes(x = ing$ingreso, y = ing$predict), colour = "red")
+
 # Hacemos el test Breusch-Pagan
 bptest(modelo) # Se rechaza H0, por lo tanto hay Heteroscedasticidad!!!
 
